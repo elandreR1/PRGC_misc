@@ -1,0 +1,73 @@
+
+(*************************)
+(*   Auteurs             *)
+(* BOUCHER Josselin G1.1 *)
+(* ANDRE Eliaz           *)
+(*************************)
+
+module TP31
+  use int.Int
+  use matrix.Matrix
+
+  type mint = matrix int     
+  
+  function nbelts (m: mint) : int =
+    m.rows * m.columns
+  
+  predicate ttes_cases_sauf_une (m: mint) = 
+    exists r1, c1: int. valid_index m r1 c1 /\ get m r1 c1 = 1 /\
+      (forall r, c: int. valid_index m r c -> (r = r1 /\ c = c1 \/ get m r c = 2))
+  
+end
+
+module Test31
+  use int.Int
+  use matrix.Matrix
+  use TP31
+
+  let testLib () =
+    let m = make 3 4 0 in
+      set m 0 0 2;
+    assert { m.rows = 3 };
+    assert { m.columns = 4 };
+    assert { get m 0 0 = 2 };
+    assert { get m 1 1 = 0 }
+    
+
+
+  
+
+end
+
+module TP32
+  use matrix.Matrix
+  
+  type couleur = R | V | B
+  type mcouleur = matrix couleur
+  
+  predicate ttes_bleues (m:mcouleur) = 
+  forall a b : int . valid_index m a b -> get m a b = B  
+  
+  predicate au_moins_une_verte (m:mcouleur) = 
+  exists a b : int . valid_index m a b /\ get m a b = V
+
+end
+
+module Test32
+  use matrix.Matrix
+  use TP32
+
+
+ let testCouleurs () =
+    let m1 = make 4 5 B in
+    assert { ttes_bleues m1 };
+    let m2 = make 4 5 R in
+    set m2 1 1 V;
+    assert { au_moins_une_verte m2 };
+    let m3 = make 4 5 R in
+    set m3 0 0 V;
+    set m3 0 1 V;
+    assert { not (ttes_bleues m3) };
+    assert { au_moins_une_verte m3 }
+
+end

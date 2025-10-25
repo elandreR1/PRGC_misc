@@ -1,0 +1,131 @@
+
+(*************************)
+(*   Auteurs             *)
+(* Péoui1 Nom1 GroupeTP  <-------- A MODIFIER *)
+(* Prénom2 Nom2 GroupeTP *)
+(*************************)
+
+module TP7
+  use int.Int
+  use int.MinMax
+  use option.Option
+  use bintree.Tree
+  use bintree.Occ (* pour utiliser (occ elt arbre) 
+                     et (mem elt arbre)         *)
+
+predicate estABR (a: tree int) =
+(forall x:int. mem x a -> occ x a = 1) /\
+(* Ne pas modifier la ligne ci-dessus *)
+ match a with
+ | Empty -> true
+ | Node sag e sad -> (forall x . mem x sag -> e>x ) /\ (forall y . mem y sad -> e<y ) /\ estABR sag /\ estABR sad
+ end
+    
+(* Rappel :
+   type option 'a = None | Some 'a             *)
+
+let rec rechercher_min (a: tree int) : option int
+ requires { estABR a }
+ ensures { a = Empty <-> result = None }
+ ensures { a <> Empty <-> exists min . result = Some min /\ forall x:int . mem x a -> min <= x } 
+ variant { a } 
+= match a with
+  | Empty -> None
+  | Node Empty e _ -> Some e
+  | Node sag x _ -> rechercher_min sag
+  end
+
+
+let rec rechercher_max (a: tree int) : option int
+ requires { estABR a }
+ ensures { a = Empty <-> result = None }
+ ensures { a <> Empty <-> exists max . result = Some max /\ forall x:int . mem x a -> max >= x } 
+ variant { a } 
+= match a with
+  | Empty -> None
+  | Node _ e Empty -> Some e
+  | Node _ x sad -> rechercher_max sad
+  end
+  
+let rec inserer (a : tree int) (k : int) : tree int
+  requires { estABR a }
+  requires {not mem k a}
+  variant { a }
+  ensures {
+    estABR result /\
+    (forall x:int. x <> k -> occ x result = occ x a) /\
+    occ k result = 1 }
+=
+  match a with
+  | Empty -> Node Empty k Empty
+  | Node g v d -> if v < k then inserer d k 
+                  else inserer g k
+  end
+
+val supprimer_max (a: tree int) : (tree int, int)
+ requires { true }
+ ensures { true }
+(* à modifier et compléter *)
+
+val supprimer (a : tree int) (x : int) : tree int
+ requires { true }
+ ensures { true }
+(* à modifier et compléter *)
+
+end
+
+module TP7tests
+  use int.Int
+  use int.MinMax
+  use option.Option
+  use bintree.Tree
+  use TP7
+
+(* Ne pas oublier de tester le prédicat estABR *)
+  let test_estABR () = 
+  let a = Node (Node (Node Empty 3 Empty) 5 (Node Empty 7 Empty))
+               10 (Node Empty 30 (Node Empty 40 Empty)) in 
+  assert { estABR a }
+
+
+(* Ce test est à exécuter depuis un terminal,
+   avec la commande suivante :
+   
+why3 execute tp7.mlw --use=TP7tests 'test_rechercher_min1 ()'
+  
+*)
+
+  let test_rechercher_min1 () : option int = 
+  let a = Empty in 
+  rechercher_min a
+  
+  
+  let test_rechercher_min2 () : option int = 
+  let a = Node Empty 5 Empty in 
+  rechercher_min a
+  
+  let test_rechercher_min3 () : option int = 
+  let a = Node (Node (Node Empty 3 Empty) 5 (Node Empty 7 Empty))
+               10 (Node Empty 30 (Node Empty 40 Empty)) in 
+  rechercher_min a
+ 
+(* à compléter pour tester les autres programmes du module TP7 *)
+
+  let test_inserer1 () : tree int = 
+  let a = Node (Node (Node Empty 3 Empty) 5 (Node Empty 7 Empty))
+               10 (Node Empty 30 (Node Empty 40 Empty)) in 
+  inserer a 25
+
+  let test_inserer2 () : tree int = 
+  let a = Node (Node (Node Empty 3 Empty) 5 (Node Empty 7 Empty))
+               10 (Node Empty 30 (Node Empty 40 Empty)) in 
+  inserer a 10
+
+  let test_supprimer1 () : tree int = 
+  let a = Node (Node (Node Empty 3 Empty) 5 (Node Empty 7 Empty))
+               10 (Node Empty 30 (Node Empty 40 Empty)) in 
+  supprimer a 10
+ 
+
+
+end
